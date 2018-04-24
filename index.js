@@ -8,7 +8,19 @@ import domready from 'domready';
 import isServer from './lib/isServer';
 import Renderer from './lib/Renderer';
 
+const controllerOptions = {
+  message: 'test',
+  slider: 2,
+};
+
 domready(() => {
+  const stats = new Stats();
+  const controls = new dat.GUI();
+  Object.keys(controllerOptions).forEach(key => controls.add(controllerOptions, key));
+
+  stats.showPanel(0);
+  document.body.appendChild(stats.dom);
+
   const canvas = document.querySelector('#canvas');
   window.addEventListener('resize', fit(canvas, window), false);
   const looper = loop();
@@ -17,6 +29,11 @@ domready(() => {
   fit(canvas);
   renderer.clear();
 
-  looper.on('tick', delta => renderer.render(delta));
+  looper.on('tick', (delta) => {
+    stats.begin();
+    renderer.render(delta);
+    stats.end();
+  });
+
   looper.start();
 });
