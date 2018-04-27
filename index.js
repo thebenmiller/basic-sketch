@@ -33,6 +33,7 @@ domready(() => {
   });
 
   looper.start();
+  // renderer.render();
 });
 
 // parcel specific code to disable HMR because it is pretty weird with things
