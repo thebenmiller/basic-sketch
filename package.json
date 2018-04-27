@@ -30,6 +30,7 @@
     "gl-shader": "^4.2.1",
     "gl-texture2d": "^2.1.0",
     "glsl-fast-gaussian-blur": "^1.0.2",
+    "glsl-noise": "0.0.0",
     "lib": "^3.0.2",
     "stats.js": "^0.17.0",
     "webgl-context": "^2.2.0"
