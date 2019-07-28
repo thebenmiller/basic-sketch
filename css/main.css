@@ -1,5 +1,14 @@
-@import './reset.css';
+@import "./reset.css";
 
 canvas {
+  position: absolute;
+}
+
+.stats {
+  left: 0;
+}
+
+.controls {
+  right: 0;
   position: absolute;
 }
