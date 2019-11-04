@@ -1,0 +1,13 @@
+{
+  "presets": [["@babel/env"], ["@babel/preset-react", { "pragma": "node" }]],
+  "plugins": [
+    [
+      "babel-plugin-jsx-pragmatic",
+      {
+        "module": "jsx-pragmatic",
+        "import": "node",
+        "export": "node"
+      }
+    ]
+  ]
+}

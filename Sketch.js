@@ -1,11 +1,16 @@
-import controllerSetup from "./helpers/controllerSetup";
 import fit from "canvas-fit";
 import loop from "raf-loop";
 import dat from "dat.gui/build/dat.gui.js";
 import Stats from "stats.js";
 import domready from "domready";
-import Renderer from "./lib/Renderer";
 import Color from "color";
+import {node, dom} from 'jsx-pragmatic'
+
+import controllerSetup from "./helpers/controllerSetup";
+
+import Renderer from "./Renderer";
+import Elements from "./Elements";
+import Audio from "./Audio";
 
 const document = window.document;
 
@@ -59,6 +64,12 @@ export default class Sketch {
     this.looper.on("tick", delta => {
       this.loop(delta);
     });
+
+    this.elements = new Elements();
+    document.body.append(this.elements.render(dom()));
+
+    this.audio = new Audio();
+
   }
   updateController(key, value) {
     this.renderer.setData(key, value);
