@@ -28,11 +28,11 @@ export default class Sketch {
             options: c => c.min(5).max(1000)
           },
           steps: {
-            default: 8,
+            default: 11,
             options: c => c.min(2).max(16).step(1)
           },
           pulses: {
-            default: 4,
+            default: 5,
             options: c => c.min(0).max(16).step(1)
           },
           rotate: {
@@ -40,8 +40,8 @@ export default class Sketch {
             options: c => c.min(0).max(16).step(1)
           },
           bpm: {
-            default: 60,
-            options: c => c.min(10).max(240).step(1)
+            default: 180,
+            options: c => c.min(10).max(400).step(1)
           }
         }
       ],
@@ -49,10 +49,14 @@ export default class Sketch {
         "Noise Settings",
         {
           radius: {
-            default: 50,
+            default: 120,
             options: c => c.min(12).max(400)
           },
-          morph: false
+          morph: false,
+          scale: {
+            default: 500,
+            options: c=> c.min(10).max(1000).step(1)
+          }
         }
       ]
     };

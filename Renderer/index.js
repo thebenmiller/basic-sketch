@@ -53,7 +53,7 @@ export default class Renderer {
         const x = this.circles[i].x;
         const y = this.noiseFilter.gl.drawingBufferHeight - this.circles[i].y;
         const l = y * this.noiseFilter.gl.drawingBufferWidth * 4 + x * 4;
-        responses.push(this.pixels[l]);
+        responses.push(this.pixels[l]/255);
       }
       ee.emit("pulse-response", responses);
     }

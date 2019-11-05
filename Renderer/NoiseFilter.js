@@ -15,7 +15,7 @@ export default class NoiseFilter extends WebGLFilter {
     this.uniforms.in1 = noise1;
     this.uniforms.in2 = noise2;
   }
-  incrementNoiseValues(amt = 0.001) {
+  incrementNoiseValues(amt = 0.0001) {
     this.updateNoiseValues(this.uniforms.in1, this.uniforms.in2 + amt);
   }
 }

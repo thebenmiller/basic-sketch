@@ -12,6 +12,7 @@ class Audio {
     this.activeIndex = 0;
     this.frequency = 0;
     this.bpm = 0;
+    this.scale = 0;
 
     ee.on("config", (key, value) => this.setData(key, value));
 
@@ -27,9 +28,9 @@ class Audio {
 
     ee.on("pulse-response", (frequencies) => {
       if(this.pattern[this.activeIndex]){
-        this.synth.triggerAttackRelease(this.frequency + frequencies[this.activeIndex], .25);
+        this.synth.triggerAttackRelease(this.frequency + frequencies[this.activeIndex] * this.scale, .25);
       }
-      console.log(frequencies, frequencies[this.activeIndex]);
+      // console.log(frequencies, frequencies[this.activeIndex]);
       this.activeIndex = (this.activeIndex+1)%this.pattern.length;
     });
   }
@@ -39,16 +40,17 @@ class Audio {
   }
 
   setupData(initialData) {
-    const { frequency, bpm, pattern } = initialData;
+    const { frequency, bpm, pattern, scale } = initialData;
     this.frequency = frequency;
     this.bpm = bpm;
     this.pattern = pattern;
+    this.scale = scale;
     this.setBpm();
     this.setPattern();
 
   }
   setData(key, value) {
-    const keys = ["frequency", "bpm", "pattern"];
+    const keys = ["frequency", "bpm", "pattern", "scale"];
     if (keys.includes(key)) {
       this[key] = value;
     }
