@@ -1,7 +1,6 @@
 export default function euclid(stepCount, pulseCount, rotate = 0) {
   rotate *= -1;
   rotate %= stepCount;
-  console.log(rotate);
   pulseCount = Math.min(stepCount, pulseCount);
 
   const steps = new Array(stepCount).fill(0);
@@ -16,7 +15,7 @@ export default function euclid(stepCount, pulseCount, rotate = 0) {
   }
   steps.reverse();
   if (rotate) {
-    return [].concat(steps.slice(rotate), steps.slice(0, rotate)).join("");
+    return [].concat(steps.slice(rotate), steps.slice(0, rotate));
   }
-  return steps.join("");
+  return steps;
 }

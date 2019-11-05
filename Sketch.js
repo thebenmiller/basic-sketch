@@ -13,6 +13,8 @@ import Renderer from "./Renderer";
 import Elements from "./Elements";
 import Audio from "./Audio";
 
+import euclid from "./helpers/euclid";
+
 const document = window.document;
 
 export default class Sketch {
@@ -27,19 +29,19 @@ export default class Sketch {
           },
           steps: {
             default: 8,
-            options: c => c.min(2).max(16)
+            options: c => c.min(2).max(16).step(1)
           },
           pulses: {
             default: 4,
-            options: c => c.min(0).max(16)
+            options: c => c.min(0).max(16).step(1)
           },
           rotate: {
             default: 0,
-            options: c => c.min(0).max(16)
+            options: c => c.min(0).max(16).step(1)
           },
           bpm: {
-            default: 90,
-            options: c => c.min(10).max(240)
+            default: 60,
+            options: c => c.min(10).max(240).step(1)
           }
         }
       ],
@@ -66,7 +68,7 @@ export default class Sketch {
       this.updateController
     );
 
-    console.log(this.controllerData);
+    const initialData = {...this.controllerData, pattern:euclid(this.controllerData.steps, this.controllerData.pulses, this.controllerData.rotate)};
 
     this.stats.showPanel(0);
     document.body.append(this.stats.dom);
@@ -86,21 +88,20 @@ export default class Sketch {
       this.loop(delta);
     });
 
-    this.renderer.setupData({
-      steps: this.controllerData.steps,
-      pulses: this.controllerData.pulses,
-      radius: this.controllerData.radius,
-      morph: this.controllerData.morph
-    });
+    this.renderer.setupData(initialData);
 
     this.elements = new Elements();
     document.querySelector("#content").append(this.elements.render(dom()));
 
     this.audio = new Audio();
-    this.audio.setupData(this.controllerData);
+    this.audio.setupData(initialData);
   }
   updateController(key, value) {
     ee.emit("config", key, value);
+    if(key === "steps" || key === "pulses" || key === "rotate"){
+      const pattern = euclid(this.controllerData.steps, this.controllerData.pulses, this.controllerData.rotate);
+      ee.emit("config", "pattern", pattern);
+    }
   }
   start() {
     this.stats.dom.style.display = "block";

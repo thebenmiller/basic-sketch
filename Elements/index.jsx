@@ -1,15 +1,17 @@
 import ee from "../helpers/Events";
 
 const Elements = () => {
-  function handleClick(e) {
-    ee.emit("click");
+  function handlePlay(e) {
+    ee.emit("play");
+  }
+  function handleStop(e){
+    ee.emit("stop");
   }
 
   return (
     <div>
-      <a class="button" href="#" onClick={handleClick}>
-        This is a test!
-      </a>
+      <button class="button" onClick={handlePlay}>Play</button>
+      <button class="button" onClick={handleStop}>Stop</button>
     </div>
   );
 };
