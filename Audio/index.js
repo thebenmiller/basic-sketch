@@ -11,8 +11,10 @@ class Audio {
     this.rotate = 0;
     this.bpm = 0;
 
+    ee.on("config", (key, value) => this.setData(key, value));
+
     ee.on("click", () => {
-      this.synth.triggerAttackRelease("120", ".5");
+      this.synth.triggerAttackRelease(this.frequency, ".5");
     });
   }
   setupData(initialData) {
@@ -25,13 +27,8 @@ class Audio {
   }
   setData(key, value) {
     console.log(key, value);
-    if (
-      key === "frequency" ||
-      key === "steps" ||
-      key === "pulses" ||
-      key === "rotate" ||
-      key === "bpm"
-    ) {
+    const keys = ["frequency", "steps", "pulses", "rotate", "bpm"];
+    if (keys.includes(key)) {
       this[key] = value;
     }
   }
