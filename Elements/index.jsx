@@ -1,15 +1,17 @@
-import ee from '../helpers/Events';
-import './base.css';
+import ee from "../helpers/Events";
 
 const Elements = () => {
-
-  function handleClick(e){
+  function handleClick(e) {
     ee.emit("click");
   }
 
   return (
-    <div><a class="test" href="#" onClick={handleClick}>This is a test!</a></div>
-  )
-}
+    <div>
+      <a class="button" href="#" onClick={handleClick}>
+        This is a test!
+      </a>
+    </div>
+  );
+};
 
 export default Elements;

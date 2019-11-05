@@ -6,3 +6,5 @@ export const isString = ob =>
   Object.prototype.toString.call(ob) === "[object String]";
 export const isObject = ob =>
   Object.prototype.toString.call(ob) === "[object Object]";
+export const isBoolean = ob =>
+  Object.prototype.toString.call(ob) === "[object Boolean]";

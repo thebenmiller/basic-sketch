@@ -1,4 +1,31 @@
 @import "./reset.css";
+/* @import "./vendor/bulma.min.css"; */
+
+html,
+body {
+  min-height: 100%;
+  font-size: 20px;
+  font-family: "Helvetica Neue", Helvetica, sans-serif;
+  font-weight: 300;
+}
+
+#container {
+  width: 100%;
+  max-width: 960px;
+  margin: 0 auto;
+  position: relative;
+}
+
+#canvas-container {
+  width: 100%;
+  padding-top: 56.25%;
+  /* height: 80vh; */
+  /* width: calc(16 / 9 * 80vh); */
+}
+
+#content {
+  padding: 24px;
+}
 
 canvas {
   position: absolute;
@@ -11,4 +38,5 @@ canvas {
 .controls {
   right: 0;
   position: absolute;
+  top: 0;
 }

@@ -18,26 +18,44 @@ const document = window.document;
 export default class Sketch {
   constructor() {
     const controls = {
-      message: "Hello World!",
-      color: "#f00",
-      slider: 2,
-      sliderWithOptions: {
-        default: 2,
-        options: g => g.min(0).max(10)
-      },
-      folder: [
-        "folder name",
+      audioSettings: [
+        "Audio Settings",
         {
-          message2: "test",
-          color2: "#ff0000",
-          sliderWithOptions2: {
-            default: 2,
-            options: g => g.min(0).max(10)
+          frequency: {
+            default: 120,
+            options: c => c.min(5).max(1000)
+          },
+          steps: {
+            default: 8,
+            options: c => c.min(2).max(16)
+          },
+          pulses: {
+            default: 4,
+            options: c => c.min(0).max(16)
+          },
+          rotate: {
+            default: 0,
+            options: c => c.min(0).max(16)
+          },
+          bpm: {
+            default: 90,
+            options: c => c.min(10).max(240)
           }
+        }
+      ],
+      noiseSettings: [
+        "Noise Settings",
+        {
+          radius: {
+            default: 50,
+            options: c => c.min(12).max(400)
+          },
+          morph: false
         }
       ]
     };
     this.canvas = document.querySelector("#canvas");
+    this.canvasContainer = document.querySelector("#canvas-container");
     this.stats = new Stats();
     this.controller = new dat.GUI({ autoPlace: false });
     this.updateController = this.updateController.bind(this);
@@ -48,9 +66,11 @@ export default class Sketch {
       this.updateController
     );
 
+    console.log(this.controllerData);
+
     this.stats.showPanel(0);
-    this.canvas.insertAdjacentElement("afterend", this.stats.dom);
-    this.canvas.insertAdjacentElement("afterend", this.controller.domElement);
+    document.body.append(this.stats.dom);
+    document.body.append(this.controller.domElement);
     this.stats.dom.style.display = "none";
     this.controller.domElement.style.display = "none";
     this.stats.dom.classList.add("stats");
@@ -58,18 +78,26 @@ export default class Sketch {
 
     this.resize = this.resize.bind(this);
     window.addEventListener("resize", this.resize, false);
-    fit(canvas, window);
+    fit(canvas, this.canvasContainer);
 
-    this.renderer = new Renderer(canvas, window);
+    this.renderer = new Renderer(canvas);
     this.looper = loop();
     this.looper.on("tick", delta => {
       this.loop(delta);
     });
 
+    this.renderer.setupData({
+      steps: this.controllerData.steps,
+      pulses: this.controllerData.pulses,
+      radius: this.controllerData.radius,
+      morph: this.controllerData.morph
+    });
+
     this.elements = new Elements();
-    document.body.append(this.elements.render(dom()));
+    document.querySelector("#content").append(this.elements.render(dom()));
 
     this.audio = new Audio();
+    this.audio.setupData(this.controllerData);
   }
   updateController(key, value) {
     ee.emit("config", key, value);
@@ -85,7 +113,7 @@ export default class Sketch {
     this.stats.end();
   }
   resize() {
-    fit(this.canvas, window);
+    fit(this.canvas, this.canvasContainer);
   }
   stop() {
     this.stats.dom.style.display = "none";

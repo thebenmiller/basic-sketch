@@ -1,5 +1,5 @@
 import Color from "color";
-import { isArray, isNumber, isString, isObject } from "./isType";
+import { isArray, isNumber, isString, isObject, isBoolean } from "./isType";
 /*
 
   Expects an options object like:
@@ -42,7 +42,8 @@ export default function controllerSetup(controller, controls, updateCallback) {
           if (
             typeof control === "string" ||
             typeof control === "number" ||
-            typeof control === "object"
+            typeof control === "object" ||
+            typeof control === "boolean"
           ) {
             addControl(folder, ob, key, control, updateCallback);
           }
@@ -76,11 +77,14 @@ function addControl(base, ob, key, control, updateCallback) {
     }
   } else if (isNumber(control)) {
     ob[key] = control;
+    base.add(ob, key).onChange(val => updateCallback(key, val));
+  } else if (isBoolean(control)) {
+    ob[key] = control;
     base.add(ob, key).onFinishChange(val => updateCallback(key, val));
   } else {
     //has to be an object...
     ob[key] = control.default;
     let f = control.options || (g => g);
-    f(base.add(ob, key)).onFinishChange(val => updateCallback(key, val));
+    f(base.add(ob, key)).onChange(val => updateCallback(key, val));
   }
 }

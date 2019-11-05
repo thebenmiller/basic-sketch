@@ -1,8 +1,5 @@
 import testimage from "../testimage.png";
-import BlurFilter from "./BlurFilter";
-import ThresholdFilter from "./ThresholdFilter";
-import WebGLFilter from "./WebGLFilter";
-import BloomFilter from "./BloomFilter";
+import NoiseFilter from "./NoiseFilter";
 
 import ee from "../helpers/Events";
 
@@ -10,23 +7,15 @@ export default class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
-    this.img = new Image();
-    this.img.addEventListener("load", () => {
-      if (this.waitingToRender) this.render();
-    });
-    this.message = "HELLO WORLD";
-    this.img.src = testimage;
-    this.blurFilter = new BlurFilter(window.innerWidth, window.innerHeight, 4);
-    this.thresholdFilter = new ThresholdFilter(
-      window.innerWidth,
-      window.innerHeight,
-      0.5
-    );
-    this.bloomFilter = new BloomFilter(
-      window.innerWidth,
-      window.innerHeight,
-      0.5
-    );
+
+    this.steps = 0;
+    this.pulses = 0;
+    this.rotate = 0;
+    this.radius = 0;
+    this.morph = false;
+    this.euclid = [];
+
+    this.noiseFilter = new NoiseFilter(this.w, this.h);
     this.time = 0;
     ee.on("config", (key, value) => this.setData(key, value));
   }
@@ -36,10 +25,19 @@ export default class Renderer {
   get h() {
     return this.canvas.height;
   }
+  setupData(initialData) {
+    const { steps, pulses, rotate, radius, morph } = initialData;
+    this.steps = steps;
+    this.pulses = pulses;
+    this.rotate = rotate;
+    this.radius = radius;
+    this.morph = morph;
+  }
   setData(key, value) {
     console.log(key, value);
-    if (key === "message") {
-      this.message = value;
+    const keys = ["steps", "pulses", "rotate", "radius", "morph"];
+    if (keys.includes(key)) {
+      this[key] = value;
     }
   }
   clear() {
@@ -48,33 +46,24 @@ export default class Renderer {
     this.ctx.fillRect(0, 0, this.w, this.h);
   }
   render(delta) {
-    if (!this.img.complete) {
-      this.waitingToRender = true;
-      return;
-    }
     this.time += (delta || 0) / 1000;
     this.clear();
-    this.ctx.globalCompositeOperation = "source-over";
-    this.ctx.drawImage(
-      this.img,
-      this.w / 2 - this.img.width / 2,
-      this.h / 2 - this.img.height / 2
+    if (this.morph) {
+      this.noiseFilter.incrementNoiseValues();
+    }
+    this.noiseFilter.render();
+    this.ctx.drawImage(this.noiseFilter.canvas, 0, 0);
+    this.ctx.beginPath();
+    this.ctx.strokeStyle = "magenta";
+    this.ctx.ellipse(
+      this.w / 2,
+      this.h / 2,
+      this.radius,
+      this.radius,
+      0,
+      0,
+      Math.PI * 2
     );
-    this.ctx.fillStyle = "black";
-    this.ctx.font = "150px Helvetica";
-    this.ctx.textAlign = "center";
-    this.ctx.textBaseline = "middle";
-    this.ctx.fillText(this.message, this.w / 2, this.h / 2);
-
-    this.bloomFilter.textureData = this.canvas;
-    this.bloomFilter.threshold = Math.sin(this.time) * 0.5 + 0.5;
-    this.bloomFilter.render();
-
-    this.blurFilter.blurAmount = Math.ceil(Math.sin(this.time) * 0.5 + 0.5) * 6;
-    this.blurFilter.textureData = this.bloomFilter.canvas;
-    this.blurFilter.render();
-
-    this.ctx.globalCompositeOperation = "overlay";
-    this.ctx.drawImage(this.blurFilter.canvas, 0, 0);
+    this.ctx.stroke();
   }
 }
