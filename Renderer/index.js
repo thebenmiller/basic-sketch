@@ -4,6 +4,8 @@ import ThresholdFilter from "./ThresholdFilter";
 import WebGLFilter from "./WebGLFilter";
 import BloomFilter from "./BloomFilter";
 
+import ee from "../helpers/Events";
+
 export default class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
@@ -26,6 +28,7 @@ export default class Renderer {
       0.5
     );
     this.time = 0;
+    ee.on("config", (key, value) => this.setData(key, value));
   }
   get w() {
     return this.canvas.width;

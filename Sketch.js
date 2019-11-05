@@ -4,9 +4,10 @@ import dat from "dat.gui/build/dat.gui.js";
 import Stats from "stats.js";
 import domready from "domready";
 import Color from "color";
-import {node, dom} from 'jsx-pragmatic'
+import { node, dom } from "jsx-pragmatic";
 
 import controllerSetup from "./helpers/controllerSetup";
+import ee from "./helpers/Events";
 
 import Renderer from "./Renderer";
 import Elements from "./Elements";
@@ -69,10 +70,9 @@ export default class Sketch {
     document.body.append(this.elements.render(dom()));
 
     this.audio = new Audio();
-
   }
   updateController(key, value) {
-    this.renderer.setData(key, value);
+    ee.emit("config", key, value);
   }
   start() {
     this.stats.dom.style.display = "block";
