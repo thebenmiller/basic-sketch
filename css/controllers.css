@@ -1,0 +1,70 @@
+.controllers{
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-content: stretch;
+  margin-bottom:12px;
+}
+.panel{
+  width:100%;
+  padding-right:12px;
+}
+
+.panel-horizontal{
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom:12px;
+  padding-bottom:8px;
+  width:60%;
+}
+
+.panel-title{
+  border-bottom:solid 1px #ccc;
+  padding-bottom:12px;
+}
+
+.panel-body{
+  border:solid 1px #ccc;
+  border-top:0;
+}
+
+.input-container{
+  display:flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items:baseline;
+  padding: 4px;
+  background-color:#fafafa;
+  max-width:300px;
+}
+
+.input-label{
+  width: 35%;
+}
+
+.input{
+  margin-left:8px;
+}
+
+.range-input{
+  width:60%;
+  line-height:20px;
+}
+
+.input-value{
+  width:60px;
+  text-align: right;
+}
+
+.input-checkbox{
+
+}
+
+.button{
+  background:#fafafa;
+  border:solid 1px #ccc;
+  border-radius: 4px;
+  padding:2px 8px;
+  margin-right:4px;
+}

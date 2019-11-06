@@ -1,19 +1,24 @@
 import testimage from "../testimage.png";
 import NoiseFilter from "./NoiseFilter";
+import AvgGridFilter from "./AvgGridFilter";
 
 import ee from "../helpers/Events";
+import sequences from "../Audio/Sequence";
+
+const PI2 = Math.PI * 2;
 
 export default class Renderer {
   constructor(canvas) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
 
-    this.radius = 0;
-    this.morph = false;
-    this.pattern = [];
-    this.activeIndex = 0;
+    this.config = {
+      morph: 0
+    };
 
     this.noiseFilter = new NoiseFilter(this.w, this.h);
+    this.avgGridFilter = new AvgGridFilter(this.w, this.h);
+
     this.time = 0;
     this.circles = [];
     this.pixels = new Uint8Array(
@@ -21,7 +26,7 @@ export default class Renderer {
         this.noiseFilter.gl.drawingBufferHeight *
         4
     );
-    ee.on("config", (key, value) => this.setData(key, value));
+    ee.on("visual", (key, value) => this.setData(key, value));
     ee.on("pulse", i => this.pulseEvent(i));
   }
   get w() {
@@ -31,32 +36,37 @@ export default class Renderer {
     return this.canvas.height;
   }
   setupData(initialData) {
-    const { radius, morph, pattern } = initialData;
-    this.radius = radius;
-    this.morph = morph;
-    this.pattern = pattern;
+    Object.keys(this.config).map(key => {
+      if (initialData.hasOwnProperty(key)) this.setData(key, initialData[key]);
+    });
   }
   setData(key, value) {
-    const keys = ["radius", "morph", "pattern"];
-    if (keys.includes(key)) {
-      this[key] = value;
+    if (this.config.hasOwnProperty(key)) this.config[key] = value;
+
+    switch (key) {
+      default:
+        //do nothing...
+        break;
     }
   }
-  pulseEvent(i) {
-    this.activeIndex = i;
-    const responses = [];
-    if (this.pattern.length !== this.circles.length) {
-      console.warn("pulseEvent: Circles not yet drawn, returning 0s");
-      ee.emit("pulse-response", new Array(this.pattern.length).fill(0));
-    } else {
-      for (let i = 0; i < this.pattern.length; i++) {
-        const x = this.circles[i].x;
-        const y = this.noiseFilter.gl.drawingBufferHeight - this.circles[i].y;
-        const l = y * this.noiseFilter.gl.drawingBufferWidth * 4 + x * 4;
-        responses.push(this.pixels[l]/255);
+  pulseEvent() {
+    sequences.forEach((sequence, i) => {
+      const circs = this.circles[i];
+      const { pulsePattern } = sequence;
+      if (pulsePattern.length !== circs.length) {
+        updateCVPattern(new Array(pulsePattern.length).fill(0));
+        return console.warn("pulseEvent: Circles not yet drawn, returning 0s");
       }
-      ee.emit("pulse-response", responses);
-    }
+      sequence.updateCVPattern(
+        pulsePattern.map((c, n) => {
+          const x = circs[n].x;
+          const y = this.noiseFilter.gl.drawingBufferHeight - circs[n].y;
+          const l = y * this.noiseFilter.gl.drawingBufferWidth * 4 + x * 4;
+          return this.pixels[l] / 255;
+        })
+      );
+    });
+    ee.emit("pulse-response");
   }
   clear() {
     this.ctx.clearRect(0, 0, this.w, this.h);
@@ -70,49 +80,50 @@ export default class Renderer {
       this.noiseFilter.incrementNoiseValues();
     }
     this.noiseFilter.render();
-    this.noiseFilter.gl.readPixels(
+    this.avgGridFilter.textureData = this.noiseFilter.canvas;
+    this.avgGridFilter.render();
+    this.avgGridFilter.gl.readPixels(
       0,
       0,
-      this.noiseFilter.gl.drawingBufferWidth,
-      this.noiseFilter.gl.drawingBufferHeight,
-      this.noiseFilter.gl.RGBA,
-      this.noiseFilter.gl.UNSIGNED_BYTE,
+      this.avgGridFilter.gl.drawingBufferWidth,
+      this.avgGridFilter.gl.drawingBufferHeight,
+      this.avgGridFilter.gl.RGBA,
+      this.avgGridFilter.gl.UNSIGNED_BYTE,
       this.pixels
     );
-    this.ctx.drawImage(this.noiseFilter.canvas, 0, 0);
-    this.ctx.beginPath();
-    this.ctx.strokeStyle = "magenta";
-    this.ctx.ellipse(
-      this.w / 2,
-      this.h / 2,
-      this.radius,
-      this.radius,
-      0,
-      0,
-      Math.PI * 2
-    );
-    this.ctx.stroke();
+    this.ctx.drawImage(this.avgGridFilter.canvas, 0, 0);
+
     this.circles = [];
-    for (let i = 0; i < this.pattern.length; i++) {
-      const x = Math.round(
-        this.radius * Math.sin(Math.PI * 2 * (i / this.pattern.length)) +
-          this.w / 2
-      );
-      const y = Math.round(
-        this.radius * Math.cos(Math.PI * 2 * (i / this.pattern.length)) +
-          this.h / 2
-      );
-      this.circles.push({ x, y });
+
+    sequences.forEach((sequence, i) => {
+      const { radius, pulsePattern, activeIndex } = sequence;
+      const xOffset = this.w / (sequences.length * 2);
+      const xPos = xOffset + i * xOffset * 2;
+
       this.ctx.beginPath();
-      this.ctx.ellipse(x, y, 10, 10, 0, 0, Math.PI * 2);
-      if (i === this.activeIndex) {
-        this.ctx.fillStyle = "white";
-        this.ctx.fill();
-      } else if (this.pattern[i] === 1) {
-        this.ctx.fillStyle = "magenta";
-        this.ctx.fill();
-      }
+      this.ctx.strokeStyle = "magenta";
+      this.ctx.ellipse(xPos, this.h / 2, radius, radius, 0, 0, Math.PI * 2);
       this.ctx.stroke();
-    }
+
+      this.circles.push([]);
+
+      for (let n = 0; n < pulsePattern.length; n++) {
+        const x = Math.round(
+          radius * Math.sin((PI2 * n) / pulsePattern.length) + xPos
+        );
+        const y = Math.round(
+          radius * Math.cos((PI2 * n) / pulsePattern.length) + this.h / 2
+        );
+        this.circles[i].push({ x, y });
+
+        this.ctx.beginPath();
+        this.ctx.ellipse(x, y, 10, 10, 0, 0, PI2);
+        if (n === activeIndex || pulsePattern[n]) {
+          this.ctx.fillStyle = n === activeIndex ? "white" : "magenta";
+          this.ctx.fill();
+        }
+        this.ctx.stroke();
+      }
+    });
   }
 }

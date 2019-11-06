@@ -8,6 +8,12 @@ export default class AvgGridFilter extends WebGLFilter {
   constructor(initialWidth, initialHeight) {
     super(initialWidth, initialHeight);
 
+    this.uniforms.size = 1.0;
+
     this.shader = createShader(this.gl, vert, fragTreshold);
+  }
+
+  setGridSize(size){
+    this.uniforms.size = size;
   }
 }

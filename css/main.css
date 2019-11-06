@@ -1,5 +1,5 @@
 @import "./reset.css";
-/* @import "./vendor/bulma.min.css"; */
+@import "./controllers.css";
 
 html,
 body {
@@ -24,7 +24,7 @@ body {
 }
 
 #content {
-  padding: 24px;
+padding-top:24px;
 }
 
 canvas {
