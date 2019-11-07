@@ -1,9 +1,10 @@
+import Tone from "tone";
 import ee from "../helpers/Events";
 import euclid from "../helpers/euclid";
 
 class Sequence {
   constructor({ frequency, scale, steps, pulses, rotate, radius, group }) {
-    this.activeIndex = 0;
+    this.activeIndex = -1;
     this.frequency = frequency || 0;
     this.scale = scale || 0;
     this.steps = steps || 0;
@@ -13,7 +14,10 @@ class Sequence {
     this.group = group;
     this.pulsePattern = [];
     this.cvPattern = [];
+    this.loop = new Tone.Loop(() => this.pulseEvent(), this.steps+"n").start(0);
+    this.synth = new Tone.Synth().toMaster();
     this.updatePulsePattern();
+    this.updateLoop();
     ee.on(this.group, (key, value) => this.setData(key, value));
   }
   step() {
@@ -33,6 +37,18 @@ class Sequence {
   updateCVPattern(pattern){
     this.cvPattern = pattern;
   }
+  updateLoop(){
+    this.loop.interval = this.steps+"n";
+  }
+  pulseEvent(){
+    this.step();
+    if (this.pulsePattern[this.activeIndex]) {
+      this.synth.triggerAttackRelease(
+        this.frequency + this.cvPattern[this.activeIndex] * this.scale,
+        "8n"
+      );
+    }
+  }
   setData(key, value){
     console.log(key, value);
     const keys = ["frequency", "scale", "steps", "pulses", "rotate", "radius"];
@@ -41,6 +57,9 @@ class Sequence {
     }
     if(key === "steps" || key === "pulses" || key === "rotate"){
       this.updatePulsePattern();
+    }
+    if(key === "steps"){
+      this.updateLoop();
     }
   }
 }

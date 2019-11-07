@@ -27,7 +27,6 @@ export default class Renderer {
         4
     );
     ee.on("visual", (key, value) => this.setData(key, value));
-    ee.on("pulse", i => this.pulseEvent(i));
   }
   get w() {
     return this.canvas.width;
@@ -48,25 +47,6 @@ export default class Renderer {
         //do nothing...
         break;
     }
-  }
-  pulseEvent() {
-    sequences.forEach((sequence, i) => {
-      const circs = this.circles[i];
-      const { pulsePattern } = sequence;
-      if (pulsePattern.length !== circs.length) {
-        updateCVPattern(new Array(pulsePattern.length).fill(0));
-        return console.warn("pulseEvent: Circles not yet drawn, returning 0s");
-      }
-      sequence.updateCVPattern(
-        pulsePattern.map((c, n) => {
-          const x = circs[n].x;
-          const y = this.noiseFilter.gl.drawingBufferHeight - circs[n].y;
-          const l = y * this.noiseFilter.gl.drawingBufferWidth * 4 + x * 4;
-          return this.pixels[l] / 255;
-        })
-      );
-    });
-    ee.emit("pulse-response");
   }
   clear() {
     this.ctx.clearRect(0, 0, this.w, this.h);
@@ -108,10 +88,10 @@ export default class Renderer {
       this.circles.push([]);
 
       for (let n = 0; n < pulsePattern.length; n++) {
-        const x = Math.round(
+        const x = Math.floor(
           radius * Math.sin((PI2 * n) / pulsePattern.length) + xPos
         );
-        const y = Math.round(
+        const y = Math.floor(
           radius * Math.cos((PI2 * n) / pulsePattern.length) + this.h / 2
         );
         this.circles[i].push({ x, y });
@@ -124,6 +104,19 @@ export default class Renderer {
         }
         this.ctx.stroke();
       }
+
+      if (pulsePattern.length !== this.circles[i].length) {
+        sequence.updateCVPattern(new Array(pulsePattern.length).fill(0));
+        return console.warn("pulseEvent: Circles not yet drawn, returning 0s");
+      }
+      sequence.updateCVPattern(
+        pulsePattern.map((c, n) => {
+          const x = this.circles[i][n].x;
+          const y = this.noiseFilter.gl.drawingBufferHeight - this.circles[i][n].y;
+          const l = y * this.noiseFilter.gl.drawingBufferWidth * 4 + x * 4;
+          return this.pixels[l] / 255;
+        })
+      );
     });
   }
 }
