@@ -13,7 +13,8 @@ export default class Renderer {
     this.ctx = canvas.getContext("2d");
 
     this.config = {
-      morph: 0
+      morph: false,
+      gridSize: 1
     };
 
     this.noiseFilter = new NoiseFilter(this.w, this.h);
@@ -40,8 +41,8 @@ export default class Renderer {
     });
   }
   setData(key, value) {
+    console.log(key, value);
     if (this.config.hasOwnProperty(key)) this.config[key] = value;
-
     switch (key) {
       default:
         //do nothing...
@@ -56,10 +57,11 @@ export default class Renderer {
   render(delta) {
     this.time += (delta || 0) / 1000;
     this.clear();
-    if (this.morph) {
+    if (this.config.morph) {
       this.noiseFilter.incrementNoiseValues();
     }
     this.noiseFilter.render();
+    this.avgGridFilter.setGridSize(this.config.gridSize);
     this.avgGridFilter.textureData = this.noiseFilter.canvas;
     this.avgGridFilter.render();
     this.avgGridFilter.gl.readPixels(

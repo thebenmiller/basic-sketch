@@ -29,7 +29,16 @@ const Elements = () => {
             value={180}
             group="audio"
           />
-          <CheckBox label="morph" group="visual" />
+          <CheckBox label="morph" name="morph" group="visual" />
+            <Range
+              name="gridSize"
+              label="gridSize"
+              min={1}
+              max={72}
+              step={2}
+              value={1}
+              group="visual"
+            />
         </div>
       </div>
       <div class="controllers">
@@ -66,9 +75,9 @@ const Range = ({ min, max, step, value, label, name, group }) => {
   );
 };
 
-const CheckBox = ({ label, checked, group }) => {
+const CheckBox = ({ label, checked, name, group }) => {
   const change = e => {
-    ee.emit(group, name, e.currentTarget.value);
+    ee.emit(group, name, e.currentTarget.checked);
   };
   return (
     <label class="input-container">
